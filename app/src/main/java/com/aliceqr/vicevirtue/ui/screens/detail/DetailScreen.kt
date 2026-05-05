@@ -1,5 +1,6 @@
 package com.aliceqr.vicevirtue.ui.screens.detail
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -122,20 +123,20 @@ fun DetailScreen(
                         ) {
                             TypeIconCircle(type = trackable.type, size = 64.dp)
                             Spacer(modifier = Modifier.width(16.dp))
-                            Column {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = trackable.name,
                                     style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 2
                                 )
-                                Text(
-                                    text = if (trackable.type == TrackableType.VICE) stringResource(R.string.vice) else stringResource(R.string.virtue),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    StreakChip(streak = uiState.streak, type = trackable.type)
+                                }
                             }
-                            Spacer(modifier = Modifier.weight(1f))
-                            StreakChip(streak = uiState.streak, type = trackable.type)
                         }
                     }
 

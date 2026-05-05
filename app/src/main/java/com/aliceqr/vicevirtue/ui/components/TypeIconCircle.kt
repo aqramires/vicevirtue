@@ -22,23 +22,28 @@ import com.aliceqr.vicevirtue.ui.theme.VirtueBlue
 fun TypeIconCircle(
     type: TrackableType,
     size: Dp = 40.dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    iconTint: androidx.compose.ui.graphics.Color? = null,
+    background: androidx.compose.ui.graphics.Color? = null
 ) {
-    val backgroundColor = if (type == TrackableType.VICE) ViceRed.copy(alpha = 0.15f) else VirtueBlue.copy(alpha = 0.15f)
-    val color = if (type == TrackableType.VICE) ViceRed else VirtueBlue
+    val defaultBackgroundColor = if (type == TrackableType.VICE) ViceRed.copy(alpha = 0.15f) else VirtueBlue.copy(alpha = 0.15f)
+    val defaultColor = if (type == TrackableType.VICE) ViceRed else VirtueBlue
+    
+    val finalBackgroundColor = background ?: defaultBackgroundColor
+    val finalIconTint = iconTint ?: defaultColor
     val icon = if (type == TrackableType.VICE) Icons.Default.Warning else Icons.Default.Shield
 
     Box(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(backgroundColor),
+            .background(finalBackgroundColor),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = color,
+            tint = finalIconTint,
             modifier = Modifier.size(size * 0.6f)
         )
     }

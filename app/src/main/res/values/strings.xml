@@ -55,4 +55,14 @@
     <string name="widget_description">Track your progress on your home screen.</string>
     <string name="choose_trackable">Choose a Trackable</string>
     <string name="add_first">Add a Vice or Virtue in the app first.</string>
+
+    <!-- Reminders -->
+    <string name="reminders">Reminders</string>
+    <string name="add_reminder">Add Reminder</string>
+    <string name="no_reminders">No reminders set.</string>
+    <string name="notification_title">Time for reflection!</string>
+    <string name="vice_notification_text">Remember to fight against: %1$s</string>
+    <string name="virtue_notification_text">Remember to practice: %1$s</string>
+    <string name="reminder_deleted">Reminder deleted</string>
+    <string name="select_time">Select Time</string>
 </resources>

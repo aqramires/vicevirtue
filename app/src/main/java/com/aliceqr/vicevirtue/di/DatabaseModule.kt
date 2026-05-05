@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.aliceqr.vicevirtue.data.db.ViceVirtueDatabase
 import com.aliceqr.vicevirtue.data.db.dao.EventDao
+import com.aliceqr.vicevirtue.data.db.dao.ReminderDao
 import com.aliceqr.vicevirtue.data.db.dao.TrackableDao
 import dagger.Module
 import dagger.Provides
@@ -27,4 +28,7 @@ object DatabaseModule {
 
     @Provides
     fun provideEventDao(db: ViceVirtueDatabase): EventDao = db.eventDao()
+
+    @Provides
+    fun provideReminderDao(db: ViceVirtueDatabase): ReminderDao = db.reminderDao()
 }

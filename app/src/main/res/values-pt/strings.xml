@@ -55,4 +55,14 @@
     <string name="widget_description">Acompanhe seu progresso na tela inicial.</string>
     <string name="choose_trackable">Escolha um Item</string>
     <string name="add_first">Adicione um Vício ou Virtude no app primeiro.</string>
+
+    <!-- Reminders -->
+    <string name="reminders">Lembretes</string>
+    <string name="add_reminder">Adicionar Lembrete</string>
+    <string name="no_reminders">Nenhum lembrete configurado.</string>
+    <string name="notification_title">Hora de refletir!</string>
+    <string name="vice_notification_text">Lembre-se de lutar contra: %1$s</string>
+    <string name="virtue_notification_text">Lembre-se de praticar: %1$s</string>
+    <string name="reminder_deleted">Lembrete excluído</string>
+    <string name="select_time">Selecionar Horário</string>
 </resources>

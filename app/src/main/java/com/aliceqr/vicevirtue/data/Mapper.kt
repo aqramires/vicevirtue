@@ -1,7 +1,9 @@
 package com.aliceqr.vicevirtue.data
 
 import com.aliceqr.vicevirtue.data.db.entity.EventEntity
+import com.aliceqr.vicevirtue.data.db.entity.ReminderEntity
 import com.aliceqr.vicevirtue.data.db.entity.TrackableEntity
+import com.aliceqr.vicevirtue.domain.model.Reminder
 import com.aliceqr.vicevirtue.domain.model.Trackable
 import com.aliceqr.vicevirtue.domain.model.TrackableEvent
 import com.aliceqr.vicevirtue.domain.model.TrackableType
@@ -41,5 +43,25 @@ fun TrackableEvent.toEntity(): EventEntity {
         description = description,
         timestamp = timestamp,
         count = count
+    )
+}
+
+fun ReminderEntity.toDomain(): Reminder {
+    return Reminder(
+        id = id,
+        trackableId = trackableId,
+        hour = hour,
+        minute = minute,
+        isEnabled = isEnabled
+    )
+}
+
+fun Reminder.toEntity(): ReminderEntity {
+    return ReminderEntity(
+        id = id,
+        trackableId = trackableId,
+        hour = hour,
+        minute = minute,
+        isEnabled = isEnabled
     )
 }

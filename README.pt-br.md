@@ -15,6 +15,7 @@ ViceVirtue é um aplicativo Android focado em privacidade e uso local, projetado
 - **Suporte Multi-idioma:** Suporte total para Inglês e Português (Brasil).
 - **Interface Responsiva:** Desenvolvida com Jetpack Compose seguindo o tema personalizado "Vice/Virtue" (Vermelho para Vícios, Azul para Virtudes).
 - **Widget de Tela Inicial:** Acompanhe seu hábito favorito diretamente da tela inicial com botões de registro rápido.
+- **Lembretes Inteligentes:** Agende notificações personalizadas. Vícios lembram você de lutar ("Lembre-se de lutar contra..."), enquanto Virtudes incentivam a prática ("Lembre-se de praticar...").
 - **Integridade de Dados:** Garantia de nomes exclusivos para hábitos (insensível a maiúsculas/minúsculas).
 
 ## Stack Tecnológica

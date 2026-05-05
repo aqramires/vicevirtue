@@ -74,6 +74,11 @@ object ViceVirtueTokens {
     val SpaceXL  = 32
     val SpaceXXL = 48
 
+    // Radius
+    val RadiusS = 8
+    val RadiusM = 16
+    val RadiusL = 24
+
     // Elevation
     val ElevationCard   = 2
     val ElevationModal  = 8

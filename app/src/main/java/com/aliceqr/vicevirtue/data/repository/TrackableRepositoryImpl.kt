@@ -1,9 +1,11 @@
 package com.aliceqr.vicevirtue.data.repository
 
 import com.aliceqr.vicevirtue.data.db.dao.EventDao
+import com.aliceqr.vicevirtue.data.db.dao.ReminderDao
 import com.aliceqr.vicevirtue.data.db.dao.TrackableDao
 import com.aliceqr.vicevirtue.data.toDomain
 import com.aliceqr.vicevirtue.data.toEntity
+import com.aliceqr.vicevirtue.domain.model.Reminder
 import com.aliceqr.vicevirtue.domain.model.Trackable
 import com.aliceqr.vicevirtue.domain.model.TrackableEvent
 import com.aliceqr.vicevirtue.domain.model.TrackableType
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 class TrackableRepositoryImpl @Inject constructor(
     private val trackableDao: TrackableDao,
-    private val eventDao: EventDao
+    private val eventDao: EventDao,
+    private val reminderDao: ReminderDao
 ) : TrackableRepository {
 
     override fun getAllTrackables(): Flow<List<Trackable>> =
@@ -74,4 +77,24 @@ class TrackableRepositoryImpl @Inject constructor(
 
     override suspend fun getAllEventsForTrackableAsc(trackableId: Long): List<TrackableEvent> =
         eventDao.getAllEventsForTrackableAsc(trackableId).map { it.toDomain() }
+
+    override fun getRemindersForTrackable(trackableId: Long): Flow<List<Reminder>> =
+        reminderDao.getRemindersForTrackable(trackableId).map { list ->
+            list.map { it.toDomain() }
+        }
+
+    override suspend fun getAllEnabledReminders(): List<Reminder> =
+        reminderDao.getAllEnabledReminders().map { it.toDomain() }
+
+    override suspend fun saveReminder(reminder: Reminder): Long =
+        reminderDao.insertReminder(reminder.toEntity())
+
+    override suspend fun deleteReminder(reminder: Reminder) =
+        reminderDao.deleteReminder(reminder.toEntity())
+
+    override suspend fun updateReminder(reminder: Reminder) =
+        reminderDao.updateReminder(reminder.toEntity())
+
+    override suspend fun getReminderById(id: Long): Reminder? =
+        reminderDao.getReminderById(id)?.toDomain()
 }

@@ -1,5 +1,6 @@
 package com.aliceqr.vicevirtue.domain.repository
 
+import com.aliceqr.vicevirtue.domain.model.Reminder
 import com.aliceqr.vicevirtue.domain.model.Trackable
 import com.aliceqr.vicevirtue.domain.model.TrackableEvent
 import com.aliceqr.vicevirtue.domain.model.TrackableType
@@ -26,4 +27,12 @@ interface TrackableRepository {
     suspend fun deleteEvents(events: List<TrackableEvent>)
     suspend fun getLatestEventForTrackable(trackableId: Long): TrackableEvent?
     suspend fun getAllEventsForTrackableAsc(trackableId: Long): List<TrackableEvent>
+
+    // Reminders
+    fun getRemindersForTrackable(trackableId: Long): Flow<List<Reminder>>
+    suspend fun getAllEnabledReminders(): List<Reminder>
+    suspend fun saveReminder(reminder: Reminder): Long
+    suspend fun deleteReminder(reminder: Reminder)
+    suspend fun updateReminder(reminder: Reminder)
+    suspend fun getReminderById(id: Long): Reminder?
 }

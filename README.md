@@ -11,6 +11,7 @@ ViceVirtue is a local-first Android application designed to help users manage th
 - **Detail View**: Comprehensive history for specific habits, including editing/deleting entries and updating descriptions.
 - **Global History**: Consolidated view of all activities with date grouping and filtering.
 - **Home Screen Widget**: Track your favorite habit directly from your home screen with quick-log buttons.
+- **Smart Reminders**: Schedule custom notifications to help you stay on track. Vices remind you to fight ("Fight against..."), while Virtues encourage practice ("Practice...").
 - **Multi-language Support**: Full support for English and Portuguese (Brasil).
 - **Responsive UI**: Built with Jetpack Compose using a custom "Vice/Virtue" theme (Red for Vices, Blue for Virtues).
 

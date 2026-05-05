@@ -364,17 +364,10 @@ fun HistoryItem(
                             )
                         }
                         
-                        val statusText = if (consolidated.trackable.type == TrackableType.VICE) stringResource(R.string.failure) else stringResource(R.string.success)
                         val statusColor = if (consolidated.trackable.type == TrackableType.VICE) 
                             MaterialTheme.colorScheme.secondary 
                         else 
                             MaterialTheme.colorScheme.primary
-                        Text(
-                            text = statusText,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = statusColor,
-                            fontWeight = FontWeight.Bold
-                        )
 
                         if (consolidated.occurrences.size > 1) {
                             Text(
