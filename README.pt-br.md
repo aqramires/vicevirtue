@@ -14,15 +14,18 @@ ViceVirtue é um aplicativo Android focado em privacidade e uso local, projetado
 - **Histórico Global:** Visão consolidada de todas as atividades, agrupadas por data e com suporte a filtros por tipo.
 - **Suporte Multi-idioma:** Suporte total para Inglês e Português (Brasil).
 - **Interface Responsiva:** Desenvolvida com Jetpack Compose seguindo o tema personalizado "Vice/Virtue" (Vermelho para Vícios, Azul para Virtudes).
+- **Widget de Tela Inicial:** Acompanhe seu hábito favorito diretamente da tela inicial com botões de registro rápido.
 - **Integridade de Dados:** Garantia de nomes exclusivos para hábitos (insensível a maiúsculas/minúsculas).
 
 ## Stack Tecnológica
 
-- **Linguagem:** Kotlin
+- **Linguagem:** Kotlin 2.0.21
 - **Framework de UI:** Jetpack Compose (Material 3)
 - **Arquitetura:** MVVM + Clean Architecture (Arquitetura Limpa)
 - **Banco de Dados:** Room (SQLite Local)
 - **Injeção de Dependência:** Hilt
+- **Framework de Widget:** Jetpack Glance
+- **Gerenciamento de Estado:** DataStore para vinculação de widgets
 - **Navegação:** Compose Navigation
 
 ## Primeiros Passos

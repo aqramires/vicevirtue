@@ -14,8 +14,11 @@ import com.aliceqr.vicevirtue.ui.screens.history.HistoryScreen
 import com.aliceqr.vicevirtue.ui.screens.logevent.LogEventScreen
 
 @Composable
-fun ViceVirtueNavGraph(navController: NavHostController) {
-    NavHost(navController, startDestination = Screen.Dashboard.route) {
+fun ViceVirtueNavGraph(
+    navController: NavHostController,
+    startDestination: String = Screen.Dashboard.route
+) {
+    NavHost(navController, startDestination = startDestination) {
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 navController = navController,

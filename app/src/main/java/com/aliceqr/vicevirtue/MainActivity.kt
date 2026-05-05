@@ -24,8 +24,18 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val deepLinkId = intent.getLongExtra("deep_link_trackable_id", -1L)
+                    val startDestination = if (deepLinkId != -1L) {
+                        com.aliceqr.vicevirtue.ui.navigation.Screen.Detail.createRoute(deepLinkId)
+                    } else {
+                        com.aliceqr.vicevirtue.ui.navigation.Screen.Dashboard.route
+                    }
+
                     val navController = rememberNavController()
-                    ViceVirtueNavGraph(navController = navController)
+                    ViceVirtueNavGraph(
+                        navController = navController,
+                        startDestination = startDestination
+                    )
                 }
             }
         }

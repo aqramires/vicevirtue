@@ -46,8 +46,13 @@
     <string name="log_progress">Registrar Progresso</string>
     <string name="failed">Falhei</string>
     <string name="triumphed">Triunfei</string>
+    <string name="widget_days_clean">dias\nlimpo</string>
+    <string name="widget_days_strong">dias\nforte</string>
     <string name="history_failures">Histórico de Falhas</string>
     <string name="history_triumphs">Histórico de Triunfos</string>
     <string name="dont_give_up">Não desista!</string>
     <string name="congratulations">Parabéns!</string>
+    <string name="widget_description">Acompanhe seu progresso na tela inicial.</string>
+    <string name="choose_trackable">Escolha um Item</string>
+    <string name="add_first">Adicione um Vício ou Virtude no app primeiro.</string>
 </resources>

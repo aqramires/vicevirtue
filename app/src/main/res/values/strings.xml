@@ -46,8 +46,13 @@
     <string name="log_progress">Log Progress</string>
     <string name="failed">Failed</string>
     <string name="triumphed">Triumphed</string>
+    <string name="widget_days_clean">days\nclean</string>
+    <string name="widget_days_strong">days\nstrong</string>
     <string name="history_failures">Failure History</string>
     <string name="history_triumphs">Triumph History</string>
     <string name="dont_give_up">Don\'t give up!</string>
     <string name="congratulations">Congratulations!</string>
+    <string name="widget_description">Track your progress on your home screen.</string>
+    <string name="choose_trackable">Choose a Trackable</string>
+    <string name="add_first">Add a Vice or Virtue in the app first.</string>
 </resources>
