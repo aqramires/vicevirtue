@@ -20,4 +20,5 @@ sealed class Screen(val route: String) {
     object Detail : Screen("detail/{trackableId}") {
         fun createRoute(id: Long) = "detail/$id"
     }
+    object Settings : Screen("settings")
 }

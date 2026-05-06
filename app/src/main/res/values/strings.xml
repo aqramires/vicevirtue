@@ -27,7 +27,7 @@
     <string name="recent_history">Recent History</string>
     <string name="view_all">View All</string>
     <string name="no_events_logged">No events logged for this item.</string>
-    <string name="log_activity">Log Activity</string>
+    <string name="settings">Settings</string>
     <string name="delete_trackable_q">Delete Trackable?</string>
     <string name="delete_trackable_confirm">Are you sure you want to delete \'%1$s\'? All history will be permanently lost.</string>
     <string name="new_trackable">New Trackable</string>
@@ -65,4 +65,15 @@
     <string name="virtue_notification_text">Remember to practice: %1$s</string>
     <string name="reminder_deleted">Reminder deleted</string>
     <string name="select_time">Select Time</string>
+    <string name="appearance">Appearance</string>
+    <string name="general">General</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="goal_streak_optional">Goal Streak (Optional)</string>
+    <string name="add_commentary">Add Commentary</string>
+    <string name="add_commentary_desc">Add a short description or reason for this entry.</string>
+    <string name="commentary_hint">How are you feeling? What happened?</string>
+    <string name="commentary_enabled">Enable Commentary Screen</string>
+    <string name="commentary_enabled_desc">Open the commentary screen automatically when logging.</string>
 </resources>

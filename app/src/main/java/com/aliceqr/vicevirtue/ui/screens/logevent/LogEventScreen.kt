@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
 import com.aliceqr.vicevirtue.R
@@ -40,6 +41,7 @@ fun LogEventScreen(
     viewModel: LogEventViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -71,17 +73,25 @@ fun LogEventScreen(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             } else {
                 Text(
-                    text = stringResource(R.string.what_happened),
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(R.string.add_commentary),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+
+                Text(
+                    text = stringResource(R.string.add_commentary_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Start)
                 )
 
                 OutlinedTextField(
                     value = uiState.description,
                     onValueChange = viewModel::onDescriptionChange,
-                    label = { Text(stringResource(R.string.description_optional)) },
+                    label = { Text(stringResource(R.string.commentary_hint)) },
                     modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
+                    minLines = 3,
+                    maxLines = 5
                 )
 
                 if (uiState.error != null) {
@@ -100,7 +110,10 @@ fun LogEventScreen(
                     MaterialTheme.colorScheme.primary
 
                 Button(
-                    onClick = viewModel::saveEvent,
+                    onClick = {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        viewModel.saveEvent()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),

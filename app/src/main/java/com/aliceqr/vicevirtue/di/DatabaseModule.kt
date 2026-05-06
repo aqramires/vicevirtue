@@ -18,10 +18,11 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext ctx: Context): ViceVirtueDatabase =
-        Room.databaseBuilder(ctx, ViceVirtueDatabase::class.java, "vicevirtue.db")
+    fun provideDatabase(@ApplicationContext ctx: Context): ViceVirtueDatabase {
+        return Room.databaseBuilder(ctx, ViceVirtueDatabase::class.java, "vicevirtue.db")
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
+    }
 
     @Provides
     fun provideTrackableDao(db: ViceVirtueDatabase): TrackableDao = db.trackableDao()
@@ -31,4 +32,5 @@ object DatabaseModule {
 
     @Provides
     fun provideReminderDao(db: ViceVirtueDatabase): ReminderDao = db.reminderDao()
+
 }

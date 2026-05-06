@@ -1,5 +1,6 @@
 package com.aliceqr.vicevirtue.ui.screens.dashboard
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,7 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -44,6 +43,11 @@ import com.aliceqr.vicevirtue.ui.theme.ViceVirtueTokens
 
 import androidx.compose.ui.res.stringResource
 import com.aliceqr.vicevirtue.R
+import androidx.compose.material.icons.filled.Settings
+import com.aliceqr.vicevirtue.data.repository.ThemeMode
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,9 +56,11 @@ fun DashboardScreen(
     onNavigateToAdd: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToLog: (Long) -> Unit,
+    onNavigateToSettings: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     Scaffold(
         topBar = {
@@ -64,6 +70,14 @@ fun DashboardScreen(
                         stringResource(R.string.overview),
                         style = MaterialTheme.typography.displaySmall
                     ) 
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings)
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
@@ -143,13 +157,20 @@ fun DashboardScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(ViceVirtueTokens.SpaceM.dp),
-                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(ViceVirtueTokens.SpaceM.dp)
+                    verticalArrangement = Arrangement.spacedBy(ViceVirtueTokens.SpaceM.dp)
                 ) {
                     items(filteredTrackables, key = { it.trackable.id }) { item ->
                         TrackableCard(
                             trackable = item.trackable,
                             streak = item.streak,
-                            onLog = { viewModel.logEvent(item.trackable) },
+                            onLog = { 
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (uiState.isCommentaryEnabled) {
+                                    onNavigateToLog(item.trackable.id)
+                                } else {
+                                    viewModel.logEvent(item.trackable) 
+                                }
+                            },
                             onClick = { onNavigateToDetail(item.trackable.id) },
                             onLongPress = { onNavigateToLog(item.trackable.id) },
                             onDeleteEvent = { viewModel.deleteEvent(it) },
@@ -159,6 +180,7 @@ fun DashboardScreen(
 
                     item {
                         Spacer(modifier = Modifier.height(ViceVirtueTokens.SpaceL.dp))
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -171,7 +193,7 @@ fun DashboardScreen(
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.weight(1f)
                             )
-                            androidx.compose.material3.TextButton(
+                            TextButton(
                                 onClick = { navController.navigate(com.aliceqr.vicevirtue.ui.navigation.Screen.History.createRoute()) }
                             ) {
                                 Text(stringResource(R.string.view_all))

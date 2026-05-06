@@ -24,6 +24,7 @@ data class AddTrackableUiState(
     val name: String = "",
     val type: TrackableType = TrackableType.VICE,
     val reminders: List<Reminder> = emptyList(),
+    val targetStreak: String = "",
     val isSaving: Boolean = false,
     val error: String? = null,
     val isSaved: Boolean = false
@@ -78,7 +79,11 @@ class AddTrackableViewModel @Inject constructor(
         viewModelScope.launch {
             val trackable = getTrackableUseCase(id).first()
             trackable?.let { t ->
-                _uiState.update { it.copy(name = t.name, type = t.type) }
+                _uiState.update { it.copy(
+                    name = t.name, 
+                    type = t.type,
+                    targetStreak = t.targetStreak?.toString() ?: ""
+                ) }
             }
             
             // Load initial reminders into the local list
@@ -91,6 +96,13 @@ class AddTrackableViewModel @Inject constructor(
         _uiState.update { it.copy(name = newName) }
     }
 
+    fun onTargetStreakChange(newTarget: String) {
+        // Only allow numbers
+        if (newTarget.all { it.isDigit() }) {
+            _uiState.update { it.copy(targetStreak = newTarget) }
+        }
+    }
+
     fun onTypeChange(newType: TrackableType) {
         _uiState.update { it.copy(type = newType) }
     }
@@ -101,6 +113,8 @@ class AddTrackableViewModel @Inject constructor(
             _uiState.update { it.copy(error = "error_name_empty") }
             return
         }
+
+        val target = _uiState.value.targetStreak.toIntOrNull()
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null) }
@@ -119,9 +133,14 @@ class AddTrackableViewModel @Inject constructor(
             }
 
             val result = if (trackableId != -1L) {
-                updateTrackableUseCase(Trackable(id = trackableId, name = name, type = _uiState.value.type))
+                updateTrackableUseCase(Trackable(
+                    id = trackableId, 
+                    name = name, 
+                    type = _uiState.value.type,
+                    targetStreak = target
+                ))
             } else {
-                addTrackableUseCase(name = name, type = _uiState.value.type)
+                addTrackableUseCase(name = name, type = _uiState.value.type, targetStreak = target)
             }
 
             if (result.isSuccess) {

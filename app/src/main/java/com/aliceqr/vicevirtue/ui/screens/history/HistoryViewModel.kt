@@ -12,6 +12,7 @@ import java.util.Calendar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,8 +42,8 @@ class HistoryViewModel @Inject constructor(
                 _uiState
             ) { events, trackables, state ->
                 val trackableMap = trackables.associateBy { it.id }
-                
-                events.asSequence()
+
+                val filtered = events.asSequence()
                     .filter { event ->
                         val trackable = trackableMap[event.trackableId] ?: return@filter false
                         
@@ -60,21 +61,30 @@ class HistoryViewModel @Inject constructor(
                         cal.set(Calendar.SECOND, 0)
                         cal.set(Calendar.MILLISECOND, 0)
                         val startOfDay = cal.timeInMillis
-                        Triple(event.trackableId, event.description.trim(), startOfDay)
+                        listOf(event.trackableId, event.description.trim(), startOfDay)
                     }
-                    .mapNotNull { (triple, occurrences) ->
-                        val trackable = trackableMap[triple.first] ?: return@mapNotNull null
+                    .mapNotNull { (key, occurrences) ->
+                        val trackableId = key[0] as Long
+                        val description = key[1] as String
+                        val date = key[2] as Long
+                        
+                        val trackable = trackableMap[trackableId] ?: return@mapNotNull null
                         ConsolidatedEvent(
                             trackable = trackable,
-                            description = triple.second,
-                            date = triple.third,
+                            description = description,
+                            date = date,
                             occurrences = occurrences.sortedByDescending { it.timestamp }
                         )
                     }
                     .sortedByDescending { it.occurrences.first().timestamp }
                     .toList()
-            }.collect { combinedList ->
-                _uiState.update { it.copy(consolidatedEvents = combinedList, isLoading = false) }
+                
+                state.copy(
+                    consolidatedEvents = filtered,
+                    isLoading = false
+                )
+            }.collectLatest { newState ->
+                _uiState.update { newState }
             }
         }
     }

@@ -5,5 +5,6 @@ data class Trackable(
     val name: String,
     val type: TrackableType,
     val createdAt: Long = System.currentTimeMillis(),
+    val targetStreak: Int? = null,
     val streak: Int = 0         // Computed, not stored
 )

@@ -13,7 +13,8 @@ fun TrackableEntity.toDomain(): Trackable {
         id = id,
         name = name,
         type = TrackableType.valueOf(type),
-        createdAt = createdAt
+        createdAt = createdAt,
+        targetStreak = targetStreak
     )
 }
 
@@ -22,7 +23,8 @@ fun Trackable.toEntity(): TrackableEntity {
         id = id,
         name = name,
         type = type.name,
-        createdAt = createdAt
+        createdAt = createdAt,
+        targetStreak = targetStreak
     )
 }
 
@@ -65,3 +67,4 @@ fun Reminder.toEntity(): ReminderEntity {
         isEnabled = isEnabled
     )
 }
+

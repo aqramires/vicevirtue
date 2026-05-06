@@ -7,12 +7,12 @@
     <string name="virtues">Virtudes</string>
     <string name="vice">Vício</string>
     <string name="virtue">Virtude</string>
-    <string name="no_trackables_yet">Nenhum vício ou virtude ainda.\nToque no + para começar.</string>
-    <string name="event_history">Histórico</string>
+    <string name="no_trackables_yet">Nenhum vício ou virtude ainda.\nToque em + para começar.</string>
+    <string name="event_history">Histórico de Eventos</string>
     <string name="back">Voltar</string>
-    <string name="date_range">Intervalo de Datas</string>
+    <string name="date_range">Período</string>
     <string name="no_events_match">Nenhum evento corresponde aos filtros.</string>
-    <string name="select_date_range">Selecionar intervalo</string>
+    <string name="select_date_range">Selecionar período</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
     <string name="edit">Editar</string>
@@ -23,11 +23,11 @@
     <string name="description_reason">Descrição/Motivo</string>
     <string name="save">Salvar</string>
     <string name="delete_entry_q">Excluir Entrada?</string>
-    <string name="delete_entry_confirm">Tem certeza que deseja excluir esta entrada do registro?</string>
-    <string name="recent_history">Histórico de</string>
+    <string name="delete_entry_confirm">Tem certeza que deseja excluir esta entrada?</string>
+    <string name="recent_history">Histórico Recente</string>
     <string name="view_all">Ver Tudo</string>
     <string name="no_events_logged">Nenhum evento registrado para este item.</string>
-    <string name="log_activity">Registrar Atividade</string>
+    <string name="settings">Configurações</string>
     <string name="delete_trackable_q">Excluir Item?</string>
     <string name="delete_trackable_confirm">Tem certeza que deseja excluir \'%1$s\'? Todo o histórico será perdido permanentemente.</string>
     <string name="new_trackable">Novo Item</string>
@@ -44,8 +44,8 @@
     <string name="days_streak">%1$d dias</string>
     <string name="log_incident">Registrar Incidente</string>
     <string name="log_progress">Registrar Progresso</string>
-    <string name="failed">Falhei</string>
-    <string name="triumphed">Triunfei</string>
+    <string name="failed">Falhou</string>
+    <string name="triumphed">Triunfou</string>
     <string name="widget_days_clean">dias\nlimpo</string>
     <string name="widget_days_strong">dias\nforte</string>
     <string name="history_failures">Histórico de Falhas</string>
@@ -59,10 +59,21 @@
     <!-- Reminders -->
     <string name="reminders">Lembretes</string>
     <string name="add_reminder">Adicionar Lembrete</string>
-    <string name="no_reminders">Nenhum lembrete configurado.</string>
-    <string name="notification_title">Hora de refletir!</string>
+    <string name="no_reminders">Nenhum lembrete definido.</string>
+    <string name="notification_title">Hora de reflexão!</string>
     <string name="vice_notification_text">Lembre-se de lutar contra: %1$s</string>
     <string name="virtue_notification_text">Lembre-se de praticar: %1$s</string>
     <string name="reminder_deleted">Lembrete excluído</string>
     <string name="select_time">Selecionar Horário</string>
+    <string name="appearance">Aparência</string>
+    <string name="general">Geral</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="goal_streak_optional">Meta de Dias (Opcional)</string>
+    <string name="add_commentary">Adicionar Comentário</string>
+    <string name="add_commentary_desc">Adicione uma breve descrição ou motivo para esta entrada.</string>
+    <string name="commentary_hint">Como você está se sentindo? O que aconteceu?</string>
+    <string name="commentary_enabled">Habilitar Tela de Comentário</string>
+    <string name="commentary_enabled_desc">Abrir a tela de comentário automaticamente ao registrar.</string>
 </resources>

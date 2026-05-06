@@ -79,6 +79,23 @@ fun TrackableCard(
                         style = MaterialTheme.typography.headlineMedium
                     )
                     StreakChip(streak = streak, type = trackable.type)
+                    
+                    trackable.targetStreak?.let { target ->
+                        if (target > 0) {
+                            Spacer(modifier = Modifier.height(ViceVirtueTokens.SpaceS.dp))
+                            val progress = (streak.toFloat() / target).coerceIn(0f, 1f)
+                            androidx.compose.material3.LinearProgressIndicator(
+                                progress = { progress },
+                                modifier = Modifier.fillMaxWidth(0.8f).height(4.dp),
+                                color = if (trackable.type == TrackableType.VIRTUE) 
+                                    MaterialTheme.colorScheme.primary 
+                                else 
+                                    MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                            )
+                        }
+                    }
                 }
 
                 Button(

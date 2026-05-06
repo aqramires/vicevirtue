@@ -8,10 +8,9 @@ import com.aliceqr.vicevirtue.data.db.dao.TrackableDao
 import com.aliceqr.vicevirtue.data.db.entity.EventEntity
 import com.aliceqr.vicevirtue.data.db.entity.ReminderEntity
 import com.aliceqr.vicevirtue.data.db.entity.TrackableEntity
-
 @Database(
     entities = [TrackableEntity::class, EventEntity::class, ReminderEntity::class],
-    version = 3,
+    version = 6,
     exportSchema = false
 )
 abstract class ViceVirtueDatabase : RoomDatabase() {

@@ -8,20 +8,29 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.compose.runtime.LaunchedEffect
-import androidx.navigation.compose.rememberNavController
-import com.aliceqr.vicevirtue.ui.navigation.ViceVirtueNavGraph
-import com.aliceqr.vicevirtue.ui.theme.ViceVirtueTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.aliceqr.vicevirtue.data.repository.AppSettingsRepository
+import com.aliceqr.vicevirtue.data.repository.ThemeMode
+import javax.inject.Inject
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.LaunchedEffect
+import com.aliceqr.vicevirtue.ui.theme.ViceVirtueTheme
+import com.aliceqr.vicevirtue.ui.navigation.ViceVirtueNavGraph
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var appSettingsRepository: AppSettingsRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ViceVirtueTheme {
+            val themeMode by appSettingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            
+            ViceVirtueTheme(themeMode = themeMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

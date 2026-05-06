@@ -101,6 +101,17 @@ fun AddTrackableScreen(
                 isError = uiState.error != null && uiState.name.isEmpty()
             )
 
+            OutlinedTextField(
+                value = uiState.targetStreak,
+                onValueChange = viewModel::onTargetStreakChange,
+                label = { Text(stringResource(R.string.goal_streak_optional)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                )
+            )
+
             Text(
                 text = stringResource(R.string.type),
                 style = MaterialTheme.typography.titleMedium,

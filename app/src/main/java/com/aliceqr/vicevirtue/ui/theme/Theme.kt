@@ -3,6 +3,7 @@ package com.aliceqr.vicevirtue.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import com.aliceqr.vicevirtue.data.repository.ThemeMode
 
 private val LightColorScheme = lightColorScheme(
     primary          = VirtueBlue,
@@ -52,10 +53,15 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun ViceVirtueTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val isDark = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+    val colorScheme = if (isDark) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

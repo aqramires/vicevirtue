@@ -15,19 +15,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+import com.aliceqr.vicevirtue.data.repository.AppSettingsRepository
+import com.aliceqr.vicevirtue.data.repository.ThemeMode
 
 data class DashboardUiState(
     val trackables: List<TrackableWithStreak> = emptyList(),
     val allRecentEvents: List<ConsolidatedEvent> = emptyList(),
     val isLoading: Boolean = true,
     val showVices: Boolean = true,
-    val showVirtues: Boolean = true
+    val showVirtues: Boolean = true,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val isCommentaryEnabled: Boolean = true
 )
 
 data class TrackableWithStreak(
@@ -41,7 +43,8 @@ data class TrackableWithStreak(
 class DashboardViewModel @Inject constructor(
     private val repository: TrackableRepository,
     private val getStreakUseCase: GetStreakUseCase,
-    private val logEventUseCase: LogEventUseCase
+    private val logEventUseCase: LogEventUseCase,
+    private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -49,6 +52,20 @@ class DashboardViewModel @Inject constructor(
 
     init {
         loadTrackables()
+        observeSettings()
+    }
+
+    private fun observeSettings() {
+        viewModelScope.launch {
+            appSettingsRepository.themeMode.collectLatest { mode ->
+                _uiState.update { it.copy(themeMode = mode) }
+            }
+        }
+        viewModelScope.launch {
+            appSettingsRepository.isCommentaryEnabled.collectLatest { enabled ->
+                _uiState.update { it.copy(isCommentaryEnabled = enabled) }
+            }
+        }
     }
 
     private fun loadTrackables() {
@@ -57,30 +74,31 @@ class DashboardViewModel @Inject constructor(
             val eventsFlow = repository.getAllEvents()
 
             combine(trackablesFlow, eventsFlow) { trackables, events ->
-                // Consolidate all events for the general history section
-                val recentConsolidated = events.asSequence()
+                // Consolidate all events
+                val allConsolidated = events.asSequence()
                     .groupBy { event ->
                         val cal = Calendar.getInstance().apply { timeInMillis = event.timestamp }
                         cal.set(Calendar.HOUR_OF_DAY, 0)
                         cal.set(Calendar.MINUTE, 0)
                         cal.set(Calendar.SECOND, 0)
                         cal.set(Calendar.MILLISECOND, 0)
-                        // Group by trackable, description and date
-                        Triple(event.trackableId, event.description.trim(), cal.timeInMillis)
+                        listOf(event.trackableId, event.description.trim(), cal.timeInMillis)
                     }
-                    .mapNotNull { (triple, occurrences) ->
-                        val trackable = trackables.find { it.id == triple.first }
-                        if (trackable != null) {
-                            ConsolidatedEvent(
-                                trackable = trackable,
-                                description = triple.second,
-                                date = triple.third,
-                                occurrences = occurrences.sortedByDescending { it.timestamp }
-                            )
-                        } else null
+                    .mapNotNull { (key, occurrences) ->
+                        val trackableId = key[0] as Long
+                        val description = key[1] as String
+                        val date = key[2] as Long
+                        val trackable = trackables.find { it.id == trackableId } ?: return@mapNotNull null
+                        
+                        ConsolidatedEvent(
+                            trackable = trackable,
+                            description = description,
+                            date = date,
+                            occurrences = occurrences.sortedByDescending { it.timestamp }
+                        )
                     }
                     .sortedByDescending { it.occurrences.first().timestamp }
-                    .take(10) // Show last 10 consolidated events on dashboard
+                    .take(10)
                     .toList()
 
                 val trackablesWithStreak = trackables.map { trackable ->
@@ -90,22 +108,15 @@ class DashboardViewModel @Inject constructor(
                     )
                 }
                 
-                DashboardUiState(
-                    trackables = trackablesWithStreak,
-                    allRecentEvents = recentConsolidated,
-                    isLoading = false,
-                    showVices = _uiState.value.showVices,
-                    showVirtues = _uiState.value.showVirtues
-                )
-            }.collect { newState ->
                 _uiState.update { it.copy(
-                    trackables = newState.trackables,
-                    allRecentEvents = newState.allRecentEvents,
+                    trackables = trackablesWithStreak,
+                    allRecentEvents = allConsolidated,
                     isLoading = false
                 ) }
-            }
+            }.collectLatest { }
         }
     }
+
 
     fun toggleViceFilter() {
         _uiState.update { it.copy(showVices = !it.showVices) }
@@ -119,7 +130,7 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             logEventUseCase(
                 trackableId = trackable.id,
-                description = "" // Quick log from dashboard uses empty description
+                description = "" 
             )
         }
     }

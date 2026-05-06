@@ -74,6 +74,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Add
+
+// ...
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HistoryScreen(
@@ -81,6 +89,7 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val haptic = LocalHapticFeedback.current
     var showDatePicker by remember { mutableStateOf(false) }
 
     val title = when {
@@ -189,6 +198,7 @@ fun HistoryScreen(
                     } else null
                 )
             }
+
 
             Box(modifier = Modifier.fillMaxSize()) {
                 if (uiState.isLoading) {
@@ -392,6 +402,7 @@ fun HistoryItem(
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                     )
+
                 }
 
                 // Edit/Delete Shortcuts

@@ -8,5 +8,6 @@ data class TrackableEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val type: String,           // "VICE" or "VIRTUE"
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val targetStreak: Int? = null
 )
