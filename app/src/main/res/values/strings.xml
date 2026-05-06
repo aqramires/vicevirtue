@@ -7,7 +7,7 @@
     <string name="virtues">Virtues</string>
     <string name="vice">Vice</string>
     <string name="virtue">Virtue</string>
-    <string name="no_trackables_yet">No vices or virtues yet.\nRegister a vice or virtue to begin.</string>
+    <string name="no_trackables_yet">No vices or virtues yet.\nYour journey starts here.</string>
     <string name="event_history">Event History</string>
     <string name="back">Back</string>
     <string name="date_range">Date Range</string>
@@ -48,22 +48,13 @@
     <string name="triumphed">Triumphed</string>
     <string name="widget_days_clean">days\nclean</string>
     <string name="widget_days_strong">days\nstrong</string>
-    <string name="history_failures">History of Failures</string>
-    <string name="history_triumphs">History of Triumphs</string>
+    <string name="history_failures">Failure History</string>
+    <string name="history_triumphs">Triumph History</string>
     <string name="dont_give_up">Don\'t give up!</string>
     <string name="congratulations">Congratulations!</string>
     <string name="widget_description">Track your progress on your home screen.</string>
     <string name="choose_trackable">Choose a Trackable</string>
     <string name="add_first">Add a Vice or Virtue in the app first.</string>
-
-    <string name="main">Principal</string>
-    <string name="vices_emoji">Vices</string>
-    <string name="virtues_emoji">Virtues</string>
-    <string name="all_summary">Full History &amp; Analytics</string>
-    <string name="no_vices_yet">No vices yet.\nStay clean!</string>
-    <string name="no_virtues_yet">No virtues yet.\nBuild your strength!</string>
-    <string name="your_trackables">Your Trackables</string>
-    <string name="view_all_history">View All History</string>
 
     <!-- Reminders -->
     <string name="reminders">Reminders</string>

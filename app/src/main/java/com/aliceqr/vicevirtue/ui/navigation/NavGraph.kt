@@ -23,7 +23,7 @@ fun ViceVirtueNavGraph(
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 navController = navController,
-                onNavigateToAdd = { type -> navController.navigate(Screen.AddTrackable.createRoute(type = type)) },
+                onNavigateToAdd = { navController.navigate(Screen.AddTrackable.createRoute()) },
                 onNavigateToDetail = { id -> navController.navigate(Screen.Detail.createRoute(id)) },
                 onNavigateToLog = { id -> navController.navigate(Screen.LogEvent.createRoute(id)) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) }

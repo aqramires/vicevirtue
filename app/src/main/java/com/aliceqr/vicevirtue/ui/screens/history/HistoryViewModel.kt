@@ -42,7 +42,6 @@ class HistoryViewModel @Inject constructor(
                 _uiState
             ) { events, trackables, state ->
                 val trackableMap = trackables.associateBy { it.id }
-                val currentTrackable = trackableId?.let { id -> trackables.find { it.id == id } }
 
                 val filtered = events.asSequence()
                     .filter { event ->
@@ -82,7 +81,6 @@ class HistoryViewModel @Inject constructor(
                 
                 state.copy(
                     consolidatedEvents = filtered,
-                    filterTrackable = currentTrackable,
                     isLoading = false
                 )
             }.collectLatest { newState ->

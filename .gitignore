@@ -19,5 +19,3 @@ out/
 
 # Artifacts
 artifacts/
-*.md
-!README*.md

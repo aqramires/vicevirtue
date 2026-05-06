@@ -102,13 +102,9 @@ class DashboardViewModel @Inject constructor(
                     .toList()
 
                 val trackablesWithStreak = trackables.map { trackable ->
-                    val recentForTrackable = allConsolidated
-                        .filter { it.trackable.id == trackable.id }
-                        .take(3)
                     TrackableWithStreak(
                         trackable = trackable,
-                        streak = getStreakUseCase(trackable),
-                        recentEvents = recentForTrackable
+                        streak = getStreakUseCase(trackable)
                     )
                 }
                 
