@@ -20,5 +20,4 @@ out/
 # Artifacts
 artifacts/
 *.md
-!README.md
-!README.pt-br.md
+!README*.md

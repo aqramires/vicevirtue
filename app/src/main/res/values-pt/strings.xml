@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">ViceVirtue</string>
-    <string name="overview">Visão Geral</string>
+    <string name="principal">Principal</string>
     <string name="history">Histórico</string>
     <string name="add_trackable">Adicionar Item</string>
     <string name="vices">Vícios</string>
     <string name="virtues">Virtudes</string>
     <string name="vice">Vício</string>
     <string name="virtue">Virtude</string>
-    <string name="no_trackables_yet">Nenhum vício ou virtude ainda.\nToque em + para começar.</string>
+    <string name="no_trackables_yet">Nenhum vício ou virtude ainda.\nRegistre um Vício ou Virtude para começar.</string>
     <string name="event_history">Histórico de Eventos</string>
     <string name="back">Voltar</string>
     <string name="date_range">Período</string>
@@ -55,6 +55,15 @@
     <string name="widget_description">Acompanhe seu progresso na tela inicial.</string>
     <string name="choose_trackable">Escolha um Item</string>
     <string name="add_first">Adicione um Vício ou Virtude no app primeiro.</string>
+
+    <string name="main">Principal</string>
+    <string name="vices_emoji">Vícios</string>
+    <string name="virtues_emoji">Virtudes</string>
+    <string name="all_summary">Histórico Completo &amp; Análise</string>
+    <string name="no_vices_yet">Nenhum vício ainda.\nContinue limpo!</string>
+    <string name="no_virtues_yet">Nenhuma virtude ainda.\nConstrua sua força!</string>
+    <string name="your_trackables">Seus Itens</string>
+    <string name="view_all_history">Ver Todo o Histórico</string>
 
     <!-- Reminders -->
     <string name="reminders">Lembretes</string>

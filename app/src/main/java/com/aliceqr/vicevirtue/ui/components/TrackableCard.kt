@@ -2,7 +2,8 @@ package com.aliceqr.vicevirtue.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,12 +11,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,14 +42,12 @@ import com.aliceqr.vicevirtue.ui.theme.ViceRed
 import com.aliceqr.vicevirtue.ui.theme.ViceVirtueTokens
 import com.aliceqr.vicevirtue.ui.theme.VirtueBlue
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TrackableCard(
     trackable: Trackable,
     streak: Int,
     onLog: () -> Unit,
     onClick: () -> Unit,
-    onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteEvent: (TrackableEvent) -> Unit = {},
     onUpdateEvent: (TrackableEvent, String) -> Unit = { _, _ -> }
@@ -50,10 +55,7 @@ fun TrackableCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongPress
-            ),
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = ViceVirtueTokens.ElevationCard.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (trackable.type == TrackableType.VICE) 
@@ -69,7 +71,10 @@ fun TrackableCard(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TypeIconCircle(type = trackable.type)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    TypeIconCircle(type = trackable.type)
+                    StreakChip(streak = streak, type = trackable.type)
+                }
 
                 Spacer(modifier = Modifier.width(ViceVirtueTokens.SpaceM.dp))
 
@@ -78,7 +83,6 @@ fun TrackableCard(
                         text = trackable.name,
                         style = MaterialTheme.typography.headlineMedium
                     )
-                    StreakChip(streak = streak, type = trackable.type)
                     
                     trackable.targetStreak?.let { target ->
                         if (target > 0) {
@@ -114,6 +118,48 @@ fun TrackableCard(
                         stringResource(R.string.triumphed)
                     Text(text = logText)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun TrackableSummaryCard(
+    trackable: Trackable,
+    streak: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = ViceVirtueTokens.ElevationCard.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (trackable.type == TrackableType.VICE)
+                MaterialTheme.colorScheme.secondaryContainer
+            else
+                MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(ViceVirtueTokens.SpaceM.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                TypeIconCircle(type = trackable.type)
+                StreakChip(streak = streak, type = trackable.type)
+            }
+
+            Spacer(modifier = Modifier.width(ViceVirtueTokens.SpaceM.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = trackable.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }

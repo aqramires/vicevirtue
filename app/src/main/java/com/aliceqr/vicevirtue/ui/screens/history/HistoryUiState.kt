@@ -8,6 +8,7 @@ data class HistoryUiState(
     val consolidatedEvents: List<ConsolidatedEvent> = emptyList(),
     val isLoading: Boolean = true,
     val filterTrackableId: Long? = null,
+    val filterTrackable: Trackable? = null,
     val filterType: TrackableType? = null,
     val startDate: Long? = null,
     val endDate: Long? = null

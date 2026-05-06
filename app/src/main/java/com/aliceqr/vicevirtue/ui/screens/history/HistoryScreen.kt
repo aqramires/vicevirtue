@@ -93,9 +93,8 @@ fun HistoryScreen(
     var showDatePicker by remember { mutableStateOf(false) }
 
     val title = when {
-        uiState.filterTrackableId != null && uiState.consolidatedEvents.isNotEmpty() -> {
-            val type = uiState.consolidatedEvents.first().trackable.type
-            if (type == TrackableType.VICE) stringResource(R.string.history_failures)
+        uiState.filterTrackable != null -> {
+            if (uiState.filterTrackable!!.type == TrackableType.VICE) stringResource(R.string.history_failures)
             else stringResource(R.string.history_triumphs)
         }
         uiState.filterType == TrackableType.VICE -> stringResource(R.string.history_failures)
@@ -104,9 +103,8 @@ fun HistoryScreen(
     }
 
     val subtitle = when {
-        uiState.filterTrackableId != null && uiState.consolidatedEvents.isNotEmpty() -> {
-            val type = uiState.consolidatedEvents.first().trackable.type
-            if (type == TrackableType.VICE) stringResource(R.string.dont_give_up)
+        uiState.filterTrackable != null -> {
+            if (uiState.filterTrackable!!.type == TrackableType.VICE) stringResource(R.string.dont_give_up)
             else stringResource(R.string.congratulations)
         }
         uiState.filterType == TrackableType.VICE -> stringResource(R.string.dont_give_up)

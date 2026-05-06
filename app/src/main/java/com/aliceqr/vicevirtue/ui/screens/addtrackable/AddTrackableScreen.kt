@@ -112,47 +112,6 @@ fun AddTrackableScreen(
                 )
             )
 
-            Text(
-                text = stringResource(R.string.type),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(ViceVirtueTokens.SpaceS.dp)
-            ) {
-                TrackableType.values().forEach { type ->
-                    val isSelected = uiState.type == type
-                    val containerColor = if (type == TrackableType.VIRTUE) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.secondary
-                    }
-                    
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { viewModel.onTypeChange(type) },
-                        enabled = uiState.trackableId == -1L,
-                        label = { 
-                            Text(if (type == TrackableType.VIRTUE) stringResource(R.string.virtue) else stringResource(R.string.vice)) 
-                        },
-                        leadingIcon = {
-                            TypeIconCircle(
-                                type = type, 
-                                size = 24.dp,
-                                iconTint = if (isSelected) MaterialTheme.colorScheme.onPrimary else null,
-                                background = if (isSelected) androidx.compose.ui.graphics.Color.Transparent else null
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = containerColor,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    )
-                }
-            }
-
             // Reminders Section
             Spacer(modifier = Modifier.height(ViceVirtueTokens.SpaceS.dp))
             Row(

@@ -15,7 +15,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -66,7 +71,7 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(uiState.trackable?.name ?: stringResource(R.string.overview)) },
+                title = { Text(uiState.trackable?.name ?: stringResource(R.string.principal)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -121,7 +126,10 @@ fun DetailScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            TypeIconCircle(type = trackable.type, size = 64.dp)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                TypeIconCircle(type = trackable.type, size = 64.dp)
+                                StreakChip(streak = uiState.streak, type = trackable.type)
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
@@ -130,14 +138,24 @@ fun DetailScreen(
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 2
                                 )
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    StreakChip(streak = uiState.streak, type = trackable.type)
-                                }
                             }
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val buttonColor = if (trackable.type == TrackableType.VICE)
+                        MaterialTheme.colorScheme.secondary
+                    else
+                        MaterialTheme.colorScheme.primary
+                    val buttonText = if (trackable.type == TrackableType.VICE) stringResource(R.string.failed) else stringResource(R.string.triumphed)
+
+                    Button(
+                        onClick = { navController.navigate(Screen.LogEvent.createRoute(trackable.id)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+                    ) {
+                        Text(buttonText)
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -153,9 +171,13 @@ fun DetailScreen(
                     else 
                         stringResource(R.string.congratulations)
 
+                    var historyExpanded by remember { mutableStateOf(true) }
+
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { historyExpanded = !historyExpanded },
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -169,53 +191,48 @@ fun DetailScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
                         }
-                        TextButton(
-                            onClick = { navController.navigate(Screen.History.createRoute(trackable.id)) },
-                            modifier = Modifier.padding(top = 0.dp)
-                        ) {
-                            Text(stringResource(R.string.view_all))
+                        IconButton(onClick = { historyExpanded = !historyExpanded }) {
+                            Icon(
+                                imageVector = if (historyExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                contentDescription = null
+                            )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    if (uiState.recentEvents.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(stringResource(R.string.no_events_logged))
-                        }
-                    } else {
-                        LazyColumn(modifier = Modifier.weight(1f)) {
-                            items(uiState.recentEvents) { consolidated ->
-                        com.aliceqr.vicevirtue.ui.screens.history.HistoryItem(
-                                    consolidated = consolidated,
-                                    onDeleteEvents = viewModel::deleteEvents,
-                                    onUpdateEvent = viewModel::updateEvent,
-                                    showTrackableName = false,
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                )
+                    AnimatedVisibility(visible = historyExpanded) {
+                        Column {
+                            TextButton(
+                                onClick = { navController.navigate(Screen.History.createRoute(trackable.id)) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(stringResource(R.string.view_all))
+                            }
+
+                            if (uiState.recentEvents.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(stringResource(R.string.no_events_logged))
+                                }
+                            } else {
+                                LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                                    items(uiState.recentEvents) { consolidated ->
+                                        com.aliceqr.vicevirtue.ui.screens.history.HistoryItem(
+                                            consolidated = consolidated,
+                                            onDeleteEvents = viewModel::deleteEvents,
+                                            onUpdateEvent = viewModel::updateEvent,
+                                            showTrackableName = false,
+                                            modifier = Modifier.padding(vertical = 4.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    val buttonColor = if (trackable.type == TrackableType.VICE) 
-                        MaterialTheme.colorScheme.secondary 
-                    else 
-                        MaterialTheme.colorScheme.primary
-                    val buttonText = if (trackable.type == TrackableType.VICE) stringResource(R.string.failed) else stringResource(R.string.triumphed)
-
-                    Button(
-                        onClick = { navController.navigate(Screen.LogEvent.createRoute(trackable.id)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
-                    ) {
-                        Text(buttonText)
                     }
                 }
             }
