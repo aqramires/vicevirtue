@@ -1,3 +1,4 @@
+# Android
 *.iml
 .gradle
 /local.properties
@@ -17,5 +18,34 @@ out/
 *.hprof
 *.pyc
 
+# Gradle
+.gradle/
+build/
+*/build/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/libraries
+.idea/dictionaries
+.idea/inspectionProfiles
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/modules.xml
+.idea/runConfigurations.xml
+.idea/gradle.xml
+.idea/compiler.xml
+.idea/vcs.xml
+
+# System
+.DS_Store
+Thumbs.db
+
 # Artifacts
 artifacts/
+.gemini/
+build_log.txt
