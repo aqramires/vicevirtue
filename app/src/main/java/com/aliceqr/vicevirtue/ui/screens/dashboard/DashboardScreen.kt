@@ -1,7 +1,5 @@
 package com.aliceqr.vicevirtue.ui.screens.dashboard
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +35,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -57,12 +54,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.aliceqr.vicevirtue.R
+import com.aliceqr.vicevirtue.domain.model.Trackable
 import com.aliceqr.vicevirtue.domain.model.TrackableType
 import com.aliceqr.vicevirtue.ui.components.TrackableCard
+import com.aliceqr.vicevirtue.domain.model.TrackableEvent
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ButtonDefaults
 import com.aliceqr.vicevirtue.ui.screens.history.HistoryItem
 import com.aliceqr.vicevirtue.ui.theme.ViceVirtueTokens
 import kotlinx.coroutines.launch
@@ -81,6 +92,12 @@ fun DashboardScreen(
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
+    val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+    val fullDateFormat = remember { SimpleDateFormat("MMMM d, yyyy · HH:mm", Locale.getDefault()) }
+
+    var eventToEdit by remember { mutableStateOf<TrackableEvent?>(null) }
+    var eventsToDelete by remember { mutableStateOf<List<TrackableEvent>?>(null) }
+
     val tabs = listOf(
         TabItem(stringResource(R.string.vices), TrackableType.VICE, Icons.Default.Warning, Color(0xFFC0392B)),
         TabItem(stringResource(R.string.principal), null, Icons.Default.History, Color.Black),
@@ -92,24 +109,22 @@ fun DashboardScreen(
     val isDark = uiState.themeMode == com.aliceqr.vicevirtue.data.repository.ThemeMode.DARK || 
             (uiState.themeMode == com.aliceqr.vicevirtue.data.repository.ThemeMode.SYSTEM && androidx.compose.foundation.isSystemInDarkTheme())
 
-    val backgroundColor by animateColorAsState(
-        targetValue = when (pagerState.currentPage) {
-            1 -> if (isDark) Color.Black else Color(0xFFF5F5F5)
-            else -> MaterialTheme.colorScheme.background
-        },
-        animationSpec = tween(durationMillis = 500),
-        label = "backgroundColor"
-    )
-
-    val contentColor by animateColorAsState(
-        targetValue = when (pagerState.currentPage) {
+    // Static colors for content to avoid full-screen recomposition during swipe
+    val contentColor = remember(pagerState.currentPage, isDark) {
+        when (pagerState.currentPage) {
             0 -> if (isDark) Color(0xFFFF897D) else Color(0xFFC0392B)
             2 -> if (isDark) Color(0xFFD0E4FF) else Color(0xFF2E4FA3)
-            else -> MaterialTheme.colorScheme.onBackground
-        },
-        animationSpec = tween(durationMillis = 500),
-        label = "contentColor"
-    )
+            else -> if (isDark) Color.White else Color.Black
+        }
+    }
+
+    // Helper to get background color for a page
+    fun getPageBgColor(page: Int): Color {
+        return when (page) {
+            1 -> if (isDark) Color.Black else Color(0xFFF5F5F5)
+            else -> if (isDark) Color(0xFF1A1A1A) else Color.White
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -134,7 +149,8 @@ fun DashboardScreen(
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.settings)
+                            contentDescription = stringResource(R.string.settings),
+                            tint = contentColor
                         )
                     }
                 },
@@ -143,7 +159,23 @@ fun DashboardScreen(
                 )
             )
         },
-        containerColor = backgroundColor,
+        containerColor = Color.Transparent, // Managed by drawBehind
+        modifier = Modifier.drawBehind {
+            val offset = Math.abs(pagerState.currentPageOffsetFraction)
+            val currentBg = getPageBgColor(pagerState.currentPage)
+            
+            drawRect(currentBg)
+            
+            if (offset > 0.01f) {
+                val targetPage = if (pagerState.currentPageOffsetFraction > 0f) {
+                    (pagerState.currentPage + 1).coerceAtMost(tabs.size - 1)
+                } else {
+                    (pagerState.currentPage - 1).coerceAtLeast(0)
+                }
+                val targetBg = getPageBgColor(targetPage)
+                drawRect(targetBg, alpha = offset)
+            }
+        },
         floatingActionButton = {
             if (pagerState.currentPage != 1) {
                 FloatingActionButton(
@@ -171,7 +203,61 @@ fun DashboardScreen(
                 indicator = { tabPositions: List<androidx.compose.material3.TabPosition> ->
                     if (pagerState.currentPage < tabPositions.size) {
                         TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                            Modifier.drawWithContent {
+                                val offsetFraction = pagerState.currentPageOffsetFraction
+                                val offset = Math.abs(offsetFraction)
+                                val currentTab = tabPositions[pagerState.currentPage]
+                                val targetPage = if (offsetFraction > 0f) {
+                                    (pagerState.currentPage + 1).coerceAtMost(tabPositions.size - 1)
+                                } else if (offsetFraction < 0f) {
+                                    (pagerState.currentPage - 1).coerceAtLeast(0)
+                                } else {
+                                    pagerState.currentPage
+                                }
+                                val nextTab = tabPositions[targetPage]
+                                
+                                val indicatorWidth = currentTab.width + (nextTab.width - currentTab.width) * offset
+                                val indicatorOffset = currentTab.left + (nextTab.left - currentTab.left) * offset
+
+                                // We use drawWithContent to avoid recomposing the indicator itself too often
+                                // but actually for the indicator, offset() is also fine if limited to this scope.
+                                // Let's use a simpler way:
+                                this.drawContent()
+                            }
+                            .fillMaxWidth()
+                            .wrapContentSize(Alignment.BottomStart)
+                            .offset {
+                                val offsetFraction = pagerState.currentPageOffsetFraction
+                                val offset = Math.abs(offsetFraction)
+                                val currentTab = tabPositions[pagerState.currentPage]
+                                val targetPage = if (offsetFraction > 0f) {
+                                    (pagerState.currentPage + 1).coerceAtMost(tabPositions.size - 1)
+                                } else if (offsetFraction < 0f) {
+                                    (pagerState.currentPage - 1).coerceAtLeast(0)
+                                } else {
+                                    pagerState.currentPage
+                                }
+                                val nextTab = tabPositions[targetPage]
+                                
+                                val indicatorOffset = currentTab.left + (nextTab.left - currentTab.left) * offset
+                                androidx.compose.ui.unit.IntOffset(indicatorOffset.roundToPx(), 0)
+                            }
+                            .width(
+                                remember(pagerState.currentPage, pagerState.currentPageOffsetFraction) {
+                                    val offsetFraction = pagerState.currentPageOffsetFraction
+                                    val offset = Math.abs(offsetFraction)
+                                    val currentTab = tabPositions[pagerState.currentPage]
+                                    val targetPage = if (offsetFraction > 0f) {
+                                        (pagerState.currentPage + 1).coerceAtMost(tabPositions.size - 1)
+                                    } else if (offsetFraction < 0f) {
+                                        (pagerState.currentPage - 1).coerceAtLeast(0)
+                                    } else {
+                                        pagerState.currentPage
+                                    }
+                                    val nextTab = tabPositions[targetPage]
+                                    currentTab.width + (nextTab.width - currentTab.width) * offset
+                                }
+                            ),
                             color = contentColor
                         )
                     }
@@ -205,14 +291,10 @@ fun DashboardScreen(
                 verticalAlignment = Alignment.Top
             ) { pageIndex ->
                 val currentType = tabs[pageIndex].type
-                val filteredTrackables = remember(uiState.trackables, currentType) {
-                    if (currentType == null) uiState.trackables
-                    else uiState.trackables.filter { it.trackable.type == currentType }
-                }
-
-                val filteredEvents = remember(uiState.allRecentEvents, currentType) {
-                    if (currentType == null) uiState.allRecentEvents
-                    else uiState.allRecentEvents.filter { it.trackable.type == currentType }
+                val (filteredTrackables, filteredEvents) = when (pageIndex) {
+                    0 -> uiState.vices to uiState.vicesEvents
+                    2 -> uiState.virtues to uiState.virtuesEvents
+                    else -> uiState.allTrackables to uiState.allRecentEvents
                 }
 
                 if (uiState.isLoading) {
@@ -321,8 +403,10 @@ fun DashboardScreen(
                                 items(filteredEvents) { consolidated ->
                                     HistoryItem(
                                         consolidated = consolidated,
-                                        onDeleteEvents = viewModel::deleteEvents,
-                                        onUpdateEvent = viewModel::updateEvent,
+                                        onEditEvent = { eventToEdit = it },
+                                        onDeleteEvents = { eventsToDelete = it },
+                                        fullDateFormat = fullDateFormat,
+                                        timeFormat = timeFormat,
                                         modifier = Modifier.padding(vertical = 2.dp)
                                     )
                                 }
@@ -333,9 +417,73 @@ fun DashboardScreen(
             }
         }
     }
+
+    // Centralized Dialogs
+    if (eventToEdit != null) {
+        var editDescription by remember { mutableStateOf(eventToEdit!!.description) }
+        AlertDialog(
+            onDismissRequest = { eventToEdit = null },
+            title = { Text(stringResource(R.string.edit_activity)) },
+            text = {
+                Column {
+                    Text(
+                        text = fullDateFormat.format(Date(eventToEdit!!.timestamp)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = editDescription,
+                        onValueChange = { editDescription = it },
+                        label = { Text(stringResource(R.string.description_reason)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.updateEvent(eventToEdit!!, editDescription)
+                        eventToEdit = null
+                    }
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventToEdit = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (eventsToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { eventsToDelete = null },
+            title = { Text(stringResource(R.string.delete_entry_q)) },
+            text = { Text(stringResource(R.string.delete_entry_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteEvents(eventsToDelete!!)
+                        eventsToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventsToDelete = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
-private data class TabItem(
+data class TabItem(
     val title: String,
     val type: TrackableType?,
     val icon: androidx.compose.ui.graphics.vector.ImageVector,

@@ -7,6 +7,7 @@ import com.aliceqr.vicevirtue.domain.repository.TrackableRepository
 import com.aliceqr.vicevirtue.domain.usecase.GetStreakUseCase
 import com.aliceqr.vicevirtue.domain.usecase.LogEventUseCase
 import com.aliceqr.vicevirtue.domain.model.TrackableEvent
+import com.aliceqr.vicevirtue.domain.model.TrackableType
 import com.aliceqr.vicevirtue.ui.screens.history.ConsolidatedEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
@@ -17,22 +18,30 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 import com.aliceqr.vicevirtue.data.repository.AppSettingsRepository
 import com.aliceqr.vicevirtue.data.repository.ThemeMode
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class DashboardUiState(
-    val trackables: List<TrackableWithStreak> = emptyList(),
+    val vices: List<TrackableWithStreak> = emptyList(),
+    val virtues: List<TrackableWithStreak> = emptyList(),
+    val allTrackables: List<TrackableWithStreak> = emptyList(),
+    val vicesEvents: List<ConsolidatedEvent> = emptyList(),
+    val virtuesEvents: List<ConsolidatedEvent> = emptyList(),
     val allRecentEvents: List<ConsolidatedEvent> = emptyList(),
     val isLoading: Boolean = true,
-    val showVices: Boolean = true,
-    val showVirtues: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val isCommentaryEnabled: Boolean = true,
     val expandedSections: Map<Int, Boolean> = emptyMap()
 )
 
+@Immutable
 data class TrackableWithStreak(
     val trackable: Trackable,
     val streak: Int,
@@ -75,21 +84,23 @@ class DashboardViewModel @Inject constructor(
             val eventsFlow = repository.getAllEvents()
 
             combine(trackablesFlow, eventsFlow) { trackables, events ->
-                // Consolidate all events
+                val cal = Calendar.getInstance()
+                val eventsByTrackable = events.groupBy { it.trackableId }
+                val trackableMap = trackables.associateBy { it.id }
+
+                // Consolidate all events (optimized)
                 val allConsolidated = events.asSequence()
                     .groupBy { event ->
-                        val cal = Calendar.getInstance().apply { timeInMillis = event.timestamp }
+                        cal.timeInMillis = event.timestamp
                         cal.set(Calendar.HOUR_OF_DAY, 0)
                         cal.set(Calendar.MINUTE, 0)
                         cal.set(Calendar.SECOND, 0)
                         cal.set(Calendar.MILLISECOND, 0)
-                        listOf(event.trackableId, event.description.trim(), cal.timeInMillis)
+                        Triple(event.trackableId, event.description.trim(), cal.timeInMillis)
                     }
                     .mapNotNull { (key, occurrences) ->
-                        val trackableId = key[0] as Long
-                        val description = key[1] as String
-                        val date = key[2] as Long
-                        val trackable = trackables.find { it.id == trackableId } ?: return@mapNotNull null
+                        val (trackableId, description, date) = key
+                        val trackable = trackableMap[trackableId] ?: return@mapNotNull null
                         
                         ConsolidatedEvent(
                             trackable = trackable,
@@ -103,29 +114,51 @@ class DashboardViewModel @Inject constructor(
                     .toList()
 
                 val trackablesWithStreak = trackables.map { trackable ->
+                    val trackableEvents = eventsByTrackable[trackable.id] ?: emptyList()
                     TrackableWithStreak(
                         trackable = trackable,
-                        streak = getStreakUseCase(trackable)
+                        streak = getStreakUseCase.invoke(trackable, trackableEvents, cal)
                     )
                 }
+
+                val vices = trackablesWithStreak.filter { it.trackable.type == TrackableType.VICE }
+                val virtues = trackablesWithStreak.filter { it.trackable.type == TrackableType.VIRTUE }
                 
+                val vicesEvents = allConsolidated.filter { it.trackable.type == TrackableType.VICE }
+                val virtuesEvents = allConsolidated.filter { it.trackable.type == TrackableType.VIRTUE }
+                
+                DashboardData(
+                    vices = vices,
+                    virtues = virtues,
+                    allTrackables = trackablesWithStreak,
+                    vicesEvents = vicesEvents,
+                    virtuesEvents = virtuesEvents,
+                    allRecentEvents = allConsolidated
+                )
+            }
+            .flowOn(Dispatchers.Default)
+            .collectLatest { data ->
                 _uiState.update { it.copy(
-                    trackables = trackablesWithStreak,
-                    allRecentEvents = allConsolidated,
+                    vices = data.vices,
+                    virtues = data.virtues,
+                    allTrackables = data.allTrackables,
+                    vicesEvents = data.vicesEvents,
+                    virtuesEvents = data.virtuesEvents,
+                    allRecentEvents = data.allRecentEvents,
                     isLoading = false
                 ) }
-            }.collectLatest { }
+            }
         }
     }
 
-
-    fun toggleViceFilter() {
-        _uiState.update { it.copy(showVices = !it.showVices) }
-    }
-
-    fun toggleVirtueFilter() {
-        _uiState.update { it.copy(showVirtues = !it.showVirtues) }
-    }
+    data class DashboardData(
+        val vices: List<TrackableWithStreak>,
+        val virtues: List<TrackableWithStreak>,
+        val allTrackables: List<TrackableWithStreak>,
+        val vicesEvents: List<ConsolidatedEvent>,
+        val virtuesEvents: List<ConsolidatedEvent>,
+        val allRecentEvents: List<ConsolidatedEvent>
+    )
 
     fun logEvent(trackable: Trackable) {
         viewModelScope.launch {

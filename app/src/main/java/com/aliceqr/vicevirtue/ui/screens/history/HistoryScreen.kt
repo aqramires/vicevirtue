@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
@@ -80,7 +80,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Add
 
-// ...
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -90,9 +90,15 @@ fun HistoryScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val haptic = LocalHapticFeedback.current
+    val dateFormat = remember { SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()) }
+    val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+    val fullDateFormat = remember { SimpleDateFormat("MMMM d, yyyy · HH:mm", Locale.getDefault()) }
+
+    var eventToEdit by remember { mutableStateOf<TrackableEvent?>(null) }
+    var eventsToDelete by remember { mutableStateOf<List<TrackableEvent>?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val title = when {
+    val screenTitle = when {
         uiState.filterTrackableId != null && uiState.consolidatedEvents.isNotEmpty() -> {
             stringResource(R.string.history_of, uiState.consolidatedEvents.first().trackable.name)
         }
@@ -101,7 +107,7 @@ fun HistoryScreen(
         else -> stringResource(R.string.overall_history)
     }
 
-    val subtitle = when {
+    val screenSubtitle = when {
         uiState.filterTrackableId != null && uiState.consolidatedEvents.isNotEmpty() -> {
             val type = uiState.consolidatedEvents.first().trackable.type
             if (type == TrackableType.VICE) stringResource(R.string.dont_give_up)
@@ -117,10 +123,10 @@ fun HistoryScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(title)
-                        subtitle?.let {
+                        Text(screenTitle)
+                        if (screenSubtitle != null) {
                             Text(
-                                text = it,
+                                text = screenSubtitle,
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
@@ -153,9 +159,8 @@ fun HistoryScreen(
                     onClick = { showDatePicker = true },
                     label = { 
                         if (uiState.startDate != null && uiState.endDate != null) {
-                            val sdf = SimpleDateFormat("MMM d", Locale.getDefault())
-                            val startStr = sdf.format(Date(uiState.startDate!!))
-                            val endStr = sdf.format(Date(uiState.endDate!!))
+                            val startStr = dateFormat.format(Date(uiState.startDate!!))
+                            val endStr = dateFormat.format(Date(uiState.endDate!!))
                             if (startStr == endStr) {
                                 Text(startStr)
                             } else {
@@ -207,7 +212,7 @@ fun HistoryScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
-                        groupedEvents.forEach { (date, events) ->
+                        for ((date, events) in groupedEvents) {
                             stickyHeader {
                                 Box(
                                     modifier = Modifier
@@ -216,7 +221,7 @@ fun HistoryScreen(
                                         .padding(horizontal = 16.dp, vertical = 8.dp)
                                 ) {
                                     Text(
-                                        text = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date(date)),
+                                        text = dateFormat.format(Date(date)),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary
@@ -226,8 +231,10 @@ fun HistoryScreen(
                             items(events) { consolidated ->
                                 HistoryItem(
                                     consolidated = consolidated,
-                                    onDeleteEvents = viewModel::deleteEvents,
-                                    onUpdateEvent = viewModel::updateEvent,
+                                    onEditEvent = { eventToEdit = it },
+                                    onDeleteEvents = { eventsToDelete = it },
+                                    fullDateFormat = fullDateFormat,
+                                    timeFormat = timeFormat,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                                 )
                             }
@@ -246,6 +253,70 @@ fun HistoryScreen(
                 viewModel.onDateRangeChange(start, end)
             },
             onDismiss = { showDatePicker = false }
+        )
+    }
+
+    // Centralized Dialogs
+    if (eventToEdit != null) {
+        var editDescription by remember { mutableStateOf(eventToEdit!!.description) }
+        AlertDialog(
+            onDismissRequest = { eventToEdit = null },
+            title = { Text(stringResource(R.string.edit_activity)) },
+            text = {
+                Column {
+                    Text(
+                        text = fullDateFormat.format(Date(eventToEdit!!.timestamp)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = editDescription,
+                        onValueChange = { editDescription = it },
+                        label = { Text(stringResource(R.string.description_reason)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.updateEvent(eventToEdit!!, editDescription)
+                        eventToEdit = null
+                    }
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventToEdit = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (eventsToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { eventsToDelete = null },
+            title = { Text(stringResource(R.string.delete_entry_q)) },
+            text = { Text(stringResource(R.string.delete_entry_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteEvents(eventsToDelete!!)
+                        eventsToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventsToDelete = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
 }
@@ -304,15 +375,15 @@ fun DateRangePickerModal(
 @Composable
 fun HistoryItem(
     consolidated: ConsolidatedEvent,
+    onEditEvent: (TrackableEvent) -> Unit,
     onDeleteEvents: (List<TrackableEvent>) -> Unit,
-    onUpdateEvent: (TrackableEvent, String) -> Unit,
+    fullDateFormat: SimpleDateFormat,
+    timeFormat: SimpleDateFormat,
     modifier: Modifier = Modifier,
     showTrackableName: Boolean = true,
     showIcon: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var eventToEdit by remember { mutableStateOf<TrackableEvent?>(null) }
-    var eventsToDelete by remember { mutableStateOf<List<TrackableEvent>?>(null) }
 
     Card(
         modifier = modifier
@@ -375,7 +446,7 @@ fun HistoryItem(
                         )
                     }
                     Text(
-                        text = formatTimestamp(consolidated.occurrences.first().timestamp),
+                        text = fullDateFormat.format(Date(consolidated.occurrences.first().timestamp)),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                     )
@@ -385,7 +456,7 @@ fun HistoryItem(
                 // Edit/Delete Shortcuts
                 Row {
                     IconButton(
-                        onClick = { eventToEdit = consolidated.occurrences.first() },
+                        onClick = { onEditEvent(consolidated.occurrences.first()) },
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
@@ -396,7 +467,7 @@ fun HistoryItem(
                         )
                     }
                     IconButton(
-                        onClick = { eventsToDelete = consolidated.occurrences },
+                        onClick = { onDeleteEvents(consolidated.occurrences) },
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
@@ -421,13 +492,13 @@ fun HistoryItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(event.timestamp)),
+                            text = timeFormat.format(Date(event.timestamp)),
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.weight(1f),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         IconButton(
-                            onClick = { eventToEdit = event },
+                            onClick = { onEditEvent(event) },
                             modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
@@ -439,7 +510,7 @@ fun HistoryItem(
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         IconButton(
-                            onClick = { eventsToDelete = listOf(event) },
+                            onClick = { onDeleteEvents(listOf(event)) },
                             modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
@@ -454,72 +525,5 @@ fun HistoryItem(
             }
         }
     }
-
-    if (eventToEdit != null) {
-        var editDescription by remember { mutableStateOf(eventToEdit!!.description) }
-        AlertDialog(
-            onDismissRequest = { eventToEdit = null },
-            title = { Text(stringResource(R.string.edit_activity)) },
-            text = {
-                Column {
-                    Text(
-                        text = formatTimestamp(eventToEdit!!.timestamp),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = editDescription,
-                        onValueChange = { editDescription = it },
-                        label = { Text(stringResource(R.string.description_reason)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onUpdateEvent(eventToEdit!!, editDescription)
-                        eventToEdit = null
-                    }
-                ) {
-                    Text(stringResource(R.string.save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { eventToEdit = null }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-
-    if (eventsToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { eventsToDelete = null },
-            title = { Text(stringResource(R.string.delete_entry_q)) },
-            text = { Text(stringResource(R.string.delete_entry_confirm)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDeleteEvents(eventsToDelete!!)
-                        eventsToDelete = null
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { eventsToDelete = null }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
 }
 
-fun formatTimestamp(timestamp: Long): String {
-    val sdf = SimpleDateFormat("MMMM d, yyyy · HH:mm", Locale.getDefault())
-    return sdf.format(Date(timestamp))
-}

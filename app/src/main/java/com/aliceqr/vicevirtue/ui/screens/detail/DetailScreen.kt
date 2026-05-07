@@ -16,21 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,7 +34,11 @@ import com.aliceqr.vicevirtue.domain.model.TrackableType
 import com.aliceqr.vicevirtue.ui.components.StreakChip
 import com.aliceqr.vicevirtue.ui.components.TypeIconCircle
 import com.aliceqr.vicevirtue.ui.navigation.Screen
-import com.aliceqr.vicevirtue.ui.screens.history.formatTimestamp
+import com.aliceqr.vicevirtue.domain.model.TrackableEvent
+import com.aliceqr.vicevirtue.ui.screens.history.ConsolidatedEvent
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
 import com.aliceqr.vicevirtue.ui.theme.ViceRed
 import com.aliceqr.vicevirtue.ui.theme.VirtueBlue
 
@@ -62,6 +53,12 @@ fun DetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+    val fullDateFormat = remember { SimpleDateFormat("MMMM d, yyyy · HH:mm", Locale.getDefault()) }
+
+    var eventToEdit by remember { mutableStateOf<TrackableEvent?>(null) }
+    var eventsToDelete by remember { mutableStateOf<List<TrackableEvent>?>(null) }
 
     Scaffold(
         topBar = {
@@ -189,10 +186,12 @@ fun DetailScreen(
                     } else {
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             items(uiState.recentEvents) { consolidated ->
-                        com.aliceqr.vicevirtue.ui.screens.history.HistoryItem(
+                                com.aliceqr.vicevirtue.ui.screens.history.HistoryItem(
                                     consolidated = consolidated,
-                                    onDeleteEvents = viewModel::deleteEvents,
-                                    onUpdateEvent = viewModel::updateEvent,
+                                    onEditEvent = { eventToEdit = it },
+                                    onDeleteEvents = { eventsToDelete = it },
+                                    fullDateFormat = fullDateFormat,
+                                    timeFormat = timeFormat,
                                     showTrackableName = false,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 )
@@ -239,6 +238,68 @@ fun DetailScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+    if (eventToEdit != null) {
+        var editDescription by remember { mutableStateOf(eventToEdit!!.description) }
+        AlertDialog(
+            onDismissRequest = { eventToEdit = null },
+            title = { Text(stringResource(R.string.edit_activity)) },
+            text = {
+                Column {
+                    Text(
+                        text = fullDateFormat.format(Date(eventToEdit!!.timestamp)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = editDescription,
+                        onValueChange = { editDescription = it },
+                        label = { Text(stringResource(R.string.description_reason)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.updateEvent(eventToEdit!!, editDescription)
+                        eventToEdit = null
+                    }
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventToEdit = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (eventsToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { eventsToDelete = null },
+            title = { Text(stringResource(R.string.delete_entry_q)) },
+            text = { Text(stringResource(R.string.delete_entry_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteEvents(eventsToDelete!!)
+                        eventsToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventsToDelete = null }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

@@ -1,6 +1,7 @@
 package com.aliceqr.vicevirtue.domain.usecase
 
 import com.aliceqr.vicevirtue.domain.model.Trackable
+import com.aliceqr.vicevirtue.domain.model.TrackableEvent
 import com.aliceqr.vicevirtue.domain.model.TrackableType
 import com.aliceqr.vicevirtue.domain.repository.TrackableRepository
 import java.util.Calendar
@@ -21,12 +22,20 @@ class GetStreakUseCase @Inject constructor(
      */
     suspend operator fun invoke(trackable: Trackable): Int {
         val events = repository.getAllEventsForTrackableAsc(trackable.id)
+        return invoke(trackable, events)
+    }
+
+    fun invoke(
+        trackable: Trackable, 
+        events: List<TrackableEvent>,
+        calendar: Calendar = Calendar.getInstance()
+    ): Int {
         val eventDays = events
-            .map { getCalendarDay(it.timestamp) }
+            .map { getCalendarDay(it.timestamp, calendar) }
             .toSortedSet()
 
-        val today = getCalendarDay(System.currentTimeMillis())
-        val createdDay = getCalendarDay(trackable.createdAt)
+        val today = getCalendarDay(System.currentTimeMillis(), calendar)
+        val createdDay = getCalendarDay(trackable.createdAt, calendar)
 
         return when (trackable.type) {
             TrackableType.VICE -> calculateViceStreak(eventDays, today, createdDay)
@@ -60,8 +69,8 @@ class GetStreakUseCase @Inject constructor(
         return streak
     }
 
-    private fun getCalendarDay(timestamp: Long): Long {
-        val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
+    private fun getCalendarDay(timestamp: Long, cal: Calendar): Long {
+        cal.timeInMillis = timestamp
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)

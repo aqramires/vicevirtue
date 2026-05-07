@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,6 +48,7 @@ class DetailViewModel @Inject constructor(
             ) { trackable, events ->
                 if (trackable == null) {
                     _uiState.update { it.copy(isLoading = false, error = "Trackable not found") }
+                    emptyList<ConsolidatedEvent>()
                 } else {
                     val streak = getStreakUseCase(trackable)
                     
@@ -78,8 +81,19 @@ class DetailViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                    consolidated
                 }
-            }.collect {}
+            }
+            .flowOn(Dispatchers.Default)
+            .collect { consolidated ->
+                _uiState.update { 
+                    it.copy(
+                        trackable = consolidated.firstOrNull()?.trackable, // This is just for safety, trackable is already in scope
+                        recentEvents = consolidated,
+                        isLoading = false
+                    )
+                }
+            }
         }
     }
 

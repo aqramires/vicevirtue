@@ -17,9 +17,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 data class AddTrackableUiState(
+// ... (omitted for brevity in replacementContent, but I will provide the full block)
     val trackableId: Long = -1L,
     val name: String = "",
     val type: TrackableType = TrackableType.VICE,
@@ -53,7 +56,9 @@ class AddTrackableViewModel @Inject constructor(
         _localReminders
     ) { state, local ->
         state.copy(reminders = local)
-    }.stateIn(
+    }
+    .flowOn(Dispatchers.Default)
+    .stateIn(
         scope = viewModelScope,
         started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
         initialValue = AddTrackableUiState()

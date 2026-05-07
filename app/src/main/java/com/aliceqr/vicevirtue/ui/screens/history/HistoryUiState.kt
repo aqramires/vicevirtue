@@ -3,7 +3,9 @@ package com.aliceqr.vicevirtue.ui.screens.history
 import com.aliceqr.vicevirtue.domain.model.Trackable
 import com.aliceqr.vicevirtue.domain.model.TrackableEvent
 import com.aliceqr.vicevirtue.domain.model.TrackableType
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class HistoryUiState(
     val consolidatedEvents: List<ConsolidatedEvent> = emptyList(),
     val isLoading: Boolean = true,
@@ -13,6 +15,7 @@ data class HistoryUiState(
     val endDate: Long? = null
 )
 
+@Immutable
 data class ConsolidatedEvent(
     val trackable: Trackable,
     val description: String,

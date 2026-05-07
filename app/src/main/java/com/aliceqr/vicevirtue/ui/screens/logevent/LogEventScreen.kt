@@ -24,6 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -85,9 +88,14 @@ fun LogEventScreen(
                     modifier = Modifier.align(Alignment.Start)
                 )
 
+                var description by remember(uiState.trackable) { mutableStateOf(uiState.description) }
+
                 OutlinedTextField(
-                    value = uiState.description,
-                    onValueChange = viewModel::onDescriptionChange,
+                    value = description,
+                    onValueChange = { 
+                        description = it
+                        viewModel.onDescriptionChange(it) 
+                    },
                     label = { Text(stringResource(R.string.commentary_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,

@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,6 +48,7 @@ class HistoryViewModel @Inject constructor(
                 _uiState
             ) { events, trackables, state ->
                 val trackableMap = trackables.associateBy { it.id }
+                val cal = Calendar.getInstance()
 
                 val filtered = events.asSequence()
                     .filter { event ->
@@ -59,19 +62,15 @@ class HistoryViewModel @Inject constructor(
                         matchesTrackable && matchesType && matchesDate
                     }
                     .groupBy { event ->
-                        val cal = Calendar.getInstance().apply { timeInMillis = event.timestamp }
+                        cal.timeInMillis = event.timestamp
                         cal.set(Calendar.HOUR_OF_DAY, 0)
                         cal.set(Calendar.MINUTE, 0)
                         cal.set(Calendar.SECOND, 0)
                         cal.set(Calendar.MILLISECOND, 0)
-                        val startOfDay = cal.timeInMillis
-                        listOf(event.trackableId, event.description.trim(), startOfDay)
+                        Triple(event.trackableId, event.description.trim(), cal.timeInMillis)
                     }
                     .mapNotNull { (key, occurrences) ->
-                        val trackableId = key[0] as Long
-                        val description = key[1] as String
-                        val date = key[2] as Long
-                        
+                        val (trackableId, description, date) = key
                         val trackable = trackableMap[trackableId] ?: return@mapNotNull null
                         ConsolidatedEvent(
                             trackable = trackable,
@@ -83,12 +82,14 @@ class HistoryViewModel @Inject constructor(
                     .sortedByDescending { it.occurrences.first().timestamp }
                     .toList()
                 
-                state.copy(
+                filtered
+            }
+            .flowOn(Dispatchers.Default)
+            .collectLatest { filtered ->
+                _uiState.update { it.copy(
                     consolidatedEvents = filtered,
                     isLoading = false
-                )
-            }.collectLatest { newState ->
-                _uiState.update { newState }
+                ) }
             }
         }
     }

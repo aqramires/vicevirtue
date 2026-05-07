@@ -92,18 +92,26 @@ fun AddTrackableScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(ViceVirtueTokens.SpaceM.dp)
         ) {
+            var name by remember(uiState.trackableId) { mutableStateOf(uiState.name) }
             OutlinedTextField(
-                value = uiState.name,
-                onValueChange = viewModel::onNameChange,
+                value = name,
+                onValueChange = {
+                    name = it
+                    viewModel.onNameChange(it)
+                },
                 label = { Text(stringResource(R.string.name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 isError = uiState.error != null && uiState.name.isEmpty()
             )
 
+            var targetStreak by remember(uiState.trackableId) { mutableStateOf(uiState.targetStreak) }
             OutlinedTextField(
-                value = uiState.targetStreak,
-                onValueChange = viewModel::onTargetStreakChange,
+                value = targetStreak,
+                onValueChange = {
+                    targetStreak = it
+                    viewModel.onTargetStreakChange(it)
+                },
                 label = { Text(stringResource(R.string.goal_streak_optional)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
