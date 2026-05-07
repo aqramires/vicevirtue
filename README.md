@@ -7,7 +7,7 @@ ViceVirtue is a local-first Android application designed to help users manage th
 - **Virtues**: Habits you want to build. The streak represents the consecutive days you have successfully "triumphed."
 
 ## Key Features
-- **Principal Tab**: Overview of all tracked items with current streaks, quick logging, and a collapsible recent history section.
+- **Principal Tab**: Tabbed navigation between Vices and Virtues, with current streaks, quick logging, and a collapsible recent history section filtered by type.
 - **Commentary System**: Optional detailed logging. Add descriptions or reasons for each entry to contextualize your progress. Can be toggled on/off in settings.
 - **Detail View**: Comprehensive history for specific habits, including editing/deleting entries and updating descriptions.
 - **Global History**: Consolidated view of all activities with date grouping and filtering.

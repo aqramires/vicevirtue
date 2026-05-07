@@ -26,8 +26,12 @@ class HistoryViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val trackableId: Long? = savedStateHandle.get<Long>("trackableId")?.takeIf { it != -1L }
+    private val initialType: String? = savedStateHandle.get<String>("type")
 
-    private val _uiState = MutableStateFlow(HistoryUiState(filterTrackableId = trackableId))
+    private val _uiState = MutableStateFlow(HistoryUiState(
+        filterTrackableId = trackableId,
+        filterType = initialType?.let { try { TrackableType.valueOf(it) } catch(e: Exception) { null } }
+    ))
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
     init {

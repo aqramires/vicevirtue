@@ -9,7 +9,7 @@ ViceVirtue é um aplicativo Android focado em privacidade e uso local, projetado
 
 ## Principais Funcionalidades
 
-- **Aba Principal:** Visão geral de todos os itens monitorados com suas sequências atuais, registro rápido de eventos e uma seção colapsável de histórico recente.
+- **Aba Principal:** Navegação por abas entre Vícios e Virtudes, com sequências atuais (streaks), registro rápido de eventos e uma seção colapsável de histórico recente filtrada por tipo.
 - **Sistema de Comentários:** Registro detalhado opcional. Adicione descrições ou motivos para cada entrada para contextualizar seu progresso. Pode ser ativado/desativado nas configurações.
 - **Personalização de Tema:** Suporte para temas Claro, Escuro e do Sistema, configurável diretamente nas configurações.
 - **Visualização de Detalhes:** Histórico completo de um hábito específico, permitindo editar/excluir entradas e atualizar descrições/motivos.

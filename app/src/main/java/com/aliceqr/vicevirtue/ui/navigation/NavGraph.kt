@@ -56,10 +56,16 @@ fun ViceVirtueNavGraph(
         }
         composable(
             Screen.History.route,
-            arguments = listOf(navArgument("trackableId") {
-                type = NavType.LongType
-                defaultValue = -1L
-            })
+            arguments = listOf(
+                navArgument("trackableId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                },
+                navArgument("type") {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
         ) {
             HistoryScreen(navController = navController)
         }

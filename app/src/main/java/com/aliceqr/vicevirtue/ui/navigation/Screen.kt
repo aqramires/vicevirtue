@@ -13,9 +13,13 @@ sealed class Screen(val route: String) {
     object LogEvent : Screen("log_event/{trackableId}") {
         fun createRoute(id: Long) = "log_event/$id"
     }
-    object History : Screen("history?trackableId={trackableId}") {
-        fun createRoute(trackableId: Long? = null) =
-            if (trackableId != null) "history?trackableId=$trackableId" else "history"
+    object History : Screen("history?trackableId={trackableId}&type={type}") {
+        fun createRoute(trackableId: Long? = null, type: String? = null): String {
+            val params = mutableListOf<String>()
+            trackableId?.let { params.add("trackableId=$it") }
+            type?.let { params.add("type=$it") }
+            return if (params.isEmpty()) "history" else "history?${params.joinToString("&")}"
+        }
     }
     object Detail : Screen("detail/{trackableId}") {
         fun createRoute(id: Long) = "detail/$id"

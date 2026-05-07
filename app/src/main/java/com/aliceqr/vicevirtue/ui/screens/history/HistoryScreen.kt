@@ -94,13 +94,11 @@ fun HistoryScreen(
 
     val title = when {
         uiState.filterTrackableId != null && uiState.consolidatedEvents.isNotEmpty() -> {
-            val type = uiState.consolidatedEvents.first().trackable.type
-            if (type == TrackableType.VICE) stringResource(R.string.history_failures)
-            else stringResource(R.string.history_triumphs)
+            stringResource(R.string.history_of, uiState.consolidatedEvents.first().trackable.name)
         }
         uiState.filterType == TrackableType.VICE -> stringResource(R.string.history_failures)
         uiState.filterType == TrackableType.VIRTUE -> stringResource(R.string.history_triumphs)
-        else -> stringResource(R.string.event_history)
+        else -> stringResource(R.string.overall_history)
     }
 
     val subtitle = when {
@@ -148,29 +146,8 @@ fun HistoryScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.Center
             ) {
-                if (uiState.filterTrackableId == null) {
-                    FilterChip(
-                        selected = uiState.filterType == TrackableType.VICE,
-                        onClick = { viewModel.onFilterTypeChange(if (uiState.filterType == TrackableType.VICE) null else TrackableType.VICE) },
-                        label = { Text(stringResource(R.string.vices)) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    )
-                    FilterChip(
-                        selected = uiState.filterType == TrackableType.VIRTUE,
-                        onClick = { viewModel.onFilterTypeChange(if (uiState.filterType == TrackableType.VIRTUE) null else TrackableType.VIRTUE) },
-                        label = { Text(stringResource(R.string.virtues)) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    )
-                }
-
                 FilterChip(
                     selected = uiState.startDate != null,
                     onClick = { showDatePicker = true },

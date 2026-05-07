@@ -29,7 +29,8 @@ data class DashboardUiState(
     val showVices: Boolean = true,
     val showVirtues: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val isCommentaryEnabled: Boolean = true
+    val isCommentaryEnabled: Boolean = true,
+    val expandedSections: Map<Int, Boolean> = emptyMap()
 )
 
 data class TrackableWithStreak(
@@ -150,6 +151,13 @@ class DashboardViewModel @Inject constructor(
     fun updateEvent(event: TrackableEvent, newDescription: String) {
         viewModelScope.launch {
             repository.updateEvent(event.copy(description = newDescription))
+        }
+    }
+
+    fun toggleSection(pageIndex: Int) {
+        val current = _uiState.value.expandedSections[pageIndex] ?: false
+        _uiState.update { 
+            it.copy(expandedSections = it.expandedSections + (pageIndex to !current))
         }
     }
 }

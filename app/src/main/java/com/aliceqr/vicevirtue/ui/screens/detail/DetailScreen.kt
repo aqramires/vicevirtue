@@ -121,7 +121,11 @@ fun DetailScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            TypeIconCircle(type = trackable.type, size = 64.dp)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                TypeIconCircle(type = trackable.type, size = 64.dp)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                StreakChip(streak = uiState.streak, type = trackable.type)
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
@@ -130,12 +134,6 @@ fun DetailScreen(
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 2
                                 )
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    StreakChip(streak = uiState.streak, type = trackable.type)
-                                }
                             }
                         }
                     }
